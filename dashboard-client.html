@@ -1,0 +1,1353 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-[#f4f5f9]">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Streamline Portal - D-EDGE Hotel Website Platform</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              purple: '#5B1E82',
+              purpleDark: '#431362',
+              purpleLight: '#7A2CAE',
+              accentGreen: '#10B981',
+              accentGreenHover: '#059669',
+              bgLight: '#F4F5F9',
+              pillBg: '#EFEAEF',
+              cardBg: '#FFFFFF',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #f1f1f1; }
+    ::-webkit-scrollbar-thumb { background: #c5b8d0; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #5B1E82; }
+    
+    .sidebar-collapsed {
+      width: 5rem !important;
+    }
+    .sidebar-collapsed .sidebar-text,
+    .sidebar-collapsed .sidebar-footer-card {
+      display: none !important;
+    }
+    .sidebar-collapsed .sidebar-nav-btn {
+      justify-content: center !important;
+      padding-left: 0 !important;
+      padding-right: 0 !important;
+    }
+  </style>
+</head>
+<body class="h-full text-slate-800 flex overflow-hidden font-sans antialiased bg-[#f4f5f9] relative">
+
+  <!-- MOBILE OVERLAY FOR SIDEBAR -->
+  <div id="sidebar-overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/50 z-30 hidden md:hidden"></div>
+
+  <!-- COLLAPSIBLE SIDEBAR -->
+  <aside id="main-sidebar" class="fixed md:static inset-y-0 left-0 w-64 bg-brand-purple text-white flex flex-col justify-between shrink-0 shadow-2xl z-40 transition-all duration-300 transform -translate-x-full md:translate-x-0">
+    <div>
+      <!-- Sidebar Header -->
+      <div class="p-4 md:p-6 flex items-center justify-between border-b border-purple-900/40 relative">
+        <div class="flex items-center space-x-3 overflow-hidden">
+          <div class="bg-white/10 p-2 rounded-lg shrink-0">
+            <i data-lucide="layout-grid" class="w-5 h-5 md:w-6 md:h-6 text-white"></i>
+          </div>
+          <div class="sidebar-text">
+            <span class="font-bold text-base md:text-lg tracking-tight block whitespace-nowrap">Streamline</span>
+            <span class="text-[10px] text-purple-300 block -mt-1 whitespace-nowrap">D-EDGE Creation</span>
+          </div>
+        </div>
+        
+        <button id="sidebar-collapse-btn" onclick="toggleSidebar()" class="p-1.5 rounded-lg hover:bg-white/10 text-purple-300 hover:text-white transition shrink-0" title="Toggle Sidebar">
+          <i id="collapse-icon" data-lucide="chevron-left" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <nav class="mt-4 md:mt-6 px-3 space-y-1.5">
+        <!-- PROJECT BOARDS: STRICTLY HIDDEN FOR CLIENTS -->
+        <button onclick="switchView('boards')" id="nav-boards" title="Project Boards (Admin)" class="sidebar-nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-xs md:text-sm font-medium text-purple-200 hover:bg-white/10 transition">
+          <i data-lucide="kanban" class="w-4 h-4 shrink-0"></i>
+          <span class="sidebar-text truncate">Project Boards (Admin)</span>
+        </button>
+        <button onclick="switchView('timeline')" id="nav-timeline" title="Timeline Axis" class="sidebar-nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-xs md:text-sm font-semibold bg-white/15 text-white shadow-sm transition">
+          <i data-lucide="git-commit" class="w-4 h-4 shrink-0"></i>
+          <span class="sidebar-text truncate">Timeline Axis</span>
+        </button>
+      </nav>
+    </div>
+
+    <!-- Sidebar Footer Card -->
+    <div class="p-4 border-t border-purple-900/40">
+      <div class="sidebar-footer-card bg-purple-900/30 p-3 rounded-xl mb-3 border border-purple-400/20 space-y-1">
+        <div class="text-xs font-bold text-white truncate" id="sb-project-name">Le Grand Hotel Paris</div>
+        <div class="text-[11px] text-purple-200" id="sb-project-pkg">SEO Essential</div>
+        <div class="inline-block bg-purple-950 text-amber-300 text-[10px] px-2 py-0.5 rounded font-mono" id="sb-evolution-tag">Template: Crystal</div>
+        <div id="sb-pm-container" class="text-[10px] text-purple-300 pt-1 block">PM: <span id="sb-pm-name" class="text-white font-semibold">Dounia</span></div>
+      </div>
+      <div class="sidebar-text text-[11px] text-purple-300 px-1">
+        Current Role: <span id="sb-role-label" class="font-bold text-white">Manager View</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT AREA -->
+  <div class="flex-1 flex flex-col h-full overflow-hidden w-full">
+
+    <!-- TOP HEADER BAR -->
+    <header class="h-16 bg-white border-b border-slate-200 px-4 md:px-8 flex items-center justify-between shrink-0 shadow-sm z-10 gap-2">
+      <div class="flex items-center space-x-2 md:space-x-4 min-w-0">
+        <h1 id="header-project-title" class="text-base md:text-xl font-bold text-brand-purple tracking-tight truncate">Le Grand Hotel Paris</h1>
+        <span id="header-evolution-badge" class="hidden sm:inline-block bg-purple-100 text-brand-purple border border-purple-200 text-xs px-2.5 py-1 rounded-md font-mono font-semibold">
+          Template: Crystal
+        </span>
+
+        <!-- PROJECT SELECTOR: HIDDEN FOR CLIENTS -->
+        <select id="project-selector" onchange="selectProject(this.value)" class="bg-slate-50 border border-slate-200 text-xs text-slate-700 rounded-lg px-2 py-1.5 font-medium outline-none focus:ring-2 focus:ring-brand-purple max-w-[120px] sm:max-w-none truncate">
+        </select>
+      </div>
+
+      <div class="flex items-center space-x-2 md:space-x-3 shrink-0">
+        <!-- EDITABLE CLIENT EMAIL -->
+        <div id="header-email-container" class="hidden lg:flex items-center space-x-1.5 bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1 text-xs">
+          <i data-lucide="mail" class="w-3.5 h-3.5 text-slate-400"></i>
+          <span class="text-slate-500 font-semibold text-[11px]">Client:</span>
+          <input id="header-client-email" type="email" class="bg-transparent text-slate-800 text-xs font-medium outline-none w-36 xl:w-44 truncate">
+          <button id="btn-save-header-email" onclick="saveHeaderClientEmail()" class="bg-brand-purple hover:bg-brand-purpleDark text-white text-[10px] font-bold px-2 py-0.5 rounded shadow-2xs transition">
+            Save
+          </button>
+        </div>
+
+        <button id="btn-push-notify" onclick="openNotifyModal()" class="bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold px-2.5 md:px-3 py-1.5 rounded-lg flex items-center space-x-1.5 shadow-sm transition">
+          <i data-lucide="bell" class="w-3.5 h-3.5"></i>
+          <span class="hidden sm:inline">Send Alert</span>
+        </button>
+
+        <div class="bg-slate-100 p-0.5 md:p-1 rounded-xl flex items-center border border-slate-200 text-xs font-semibold">
+          <button id="btn-pm-view" onclick="setRole('pm')" class="px-2.5 md:px-4 py-1.5 rounded-lg bg-brand-purple text-white shadow-sm transition text-[11px] md:text-xs">PM</button>
+          <button id="btn-client-view" onclick="setRole('client')" class="px-2.5 md:px-4 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition text-[11px] md:text-xs">Client</button>
+        </div>
+      </div>
+    </header>
+
+    <!-- WORKSPACE CANVAS -->
+    <main class="flex-1 overflow-y-auto p-4 md:p-8 space-y-6">
+
+      <!-- VIEW 1: TIMELINE AXIS CANVAS -->
+      <div id="view-timeline" class="space-y-6">
+        <section class="bg-white rounded-2xl border border-slate-200 p-4 md:p-6 shadow-sm relative min-h-[450px] md:min-h-[500px] flex flex-col justify-center overflow-x-auto">
+          
+          <!-- TIMELINE CANVAS HEADER WITH PROJECT NAME & TEMPLATE -->
+          <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
+            <div class="flex items-center space-x-3">
+              <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Project Timeline Axis:</span>
+              <h2 id="axis-project-name" class="text-sm md:text-base font-bold text-brand-purple">Le Grand Hotel Paris</h2>
+            </div>
+            <span id="axis-evolution-tag" class="bg-purple-100 text-brand-purple border border-purple-200 text-xs px-3 py-1 rounded-full font-mono font-bold">
+              Template: Crystal
+            </span>
+          </div>
+
+          <div class="min-w-[1000px] md:min-w-[1200px] py-8 md:py-12 relative">
+            <div class="absolute top-1/2 left-12 right-12 h-1 bg-slate-700 -translate-y-1/2 z-0"></div>
+            <div id="timeline-nodes-container" class="relative z-10 flex items-center justify-start space-x-8 px-12">
+            </div>
+          </div>
+        </section>
+
+        <!-- GRAPHIC ELEMENTS SECTION -->
+        <section class="bg-white rounded-2xl border border-slate-200 p-4 md:p-6 shadow-sm space-y-6">
+          <div class="border-b border-slate-100 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <h3 class="text-sm md:text-base font-bold text-brand-purple flex items-center space-x-2">
+              <i data-lucide="palette" class="w-5 h-5 text-brand-purple"></i>
+              <span>Graphic Elements</span>
+            </h3>
+
+            <div class="flex flex-wrap items-center gap-2 sm:gap-3">
+              <div class="flex items-center space-x-2">
+                <span class="text-xs font-semibold text-slate-500">Languages:</span>
+                <div id="languages-display-container" class="flex items-center space-x-1"></div>
+                <button id="btn-edit-languages" onclick="openLanguagesModal()" class="text-xs text-brand-purple hover:underline font-bold pl-1">Edit</button>
+              </div>
+
+              <button onclick="saveGraphicElements()" class="bg-brand-purple hover:bg-brand-purpleDark text-white text-xs font-bold px-3 py-1.5 rounded-lg flex items-center space-x-1 shadow-sm transition">
+                <i data-lucide="check" class="w-3.5 h-3.5"></i>
+                <span>Save Elements</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
+            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
+              <h4 class="font-bold text-slate-900 flex items-center space-x-1.5">
+                <i data-lucide="image" class="w-4 h-4 text-brand-purple"></i>
+                <span>Images & Logos Upload</span>
+              </h4>
+
+              <div class="space-y-1 bg-white p-3 rounded-lg border border-slate-200 text-[11px] text-slate-600 select-none">
+                <span class="font-bold text-slate-800 block">Description of requirements (Read-Only):</span>
+                <p>• <strong>Visuals:</strong> JPEG format, Min size 2200 x 1100 px. Original visuals (unretouched).</p>
+                <p>• <strong>Logos:</strong> High quality, .PNG format with transparent background.</p>
+                <p>• <strong>Royalty-free sources:</strong> Pixabay or Unsplash.</p>
+              </div>
+
+              <div>
+                <label class="block font-semibold text-slate-700 mb-1">Images Google Drive Link</label>
+                <input id="ge-images-drive" type="url" placeholder="https://drive.google.com/..." class="w-full border border-slate-200 bg-white rounded-lg p-2 text-xs outline-none focus:ring-2 focus:ring-brand-purple">
+              </div>
+            </div>
+
+            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
+              <h4 class="font-bold text-slate-900 flex items-center space-x-1.5">
+                <i data-lucide="type" class="w-4 h-4 text-brand-purple"></i>
+                <span>Graphic Charter / Website Colors & Fonts</span>
+              </h4>
+
+              <div class="space-y-1 bg-white p-3 rounded-lg border border-slate-200 text-[11px] text-slate-600 select-none">
+                <span class="font-bold text-slate-800 block">Description of requirements (Read-Only):</span>
+                <p>• <strong>Colors:</strong> 3 complementary colors: main, secondary, and third harmonizing color.</p>
+                <p>• <strong>Fonts:</strong> 2 fonts: titles and body text (Google Fonts recommended).</p>
+              </div>
+
+              <div class="space-y-2">
+                <label class="block font-semibold text-slate-700">Colors Palette Selection</label>
+                <input id="ge-colors" type="text" placeholder="Main: #0B132B, Secondary: #C5A059, Third: #F4F5F9" class="w-full border border-slate-200 bg-white rounded-lg p-2 text-xs outline-none focus:ring-2 focus:ring-brand-purple">
+              </div>
+
+              <div class="space-y-2">
+                <label class="block font-semibold text-slate-700">Fonts Selection</label>
+                <input id="ge-fonts" type="text" placeholder="Title Font: Playfair Display, Text Font: Inter" class="w-full border border-slate-200 bg-white rounded-lg p-2 text-xs outline-none focus:ring-2 focus:ring-brand-purple">
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- THIRD PARTY INTEGRATIONS & FUNCTIONALITIES -->
+        <section class="bg-white rounded-2xl border border-slate-200 p-4 md:p-6 shadow-sm space-y-6">
+          <div class="border-b border-slate-100 pb-3 flex items-center justify-between">
+            <h3 class="text-sm md:text-base font-bold text-brand-purple flex items-center space-x-2">
+              <i data-lucide="layers" class="w-5 h-5 text-brand-purple"></i>
+              <span>Third Party Integrations and Functionalities</span>
+            </h3>
+          </div>
+
+          <div id="third-party-grid" class="grid grid-cols-1 md:grid-cols-3 gap-6 text-xs">
+          </div>
+        </section>
+      </div>
+
+      <!-- VIEW 2: ADMIN PROJECT BOARDS DASHBOARD (RESTRICTED TO MANAGERS ONLY) -->
+      <div id="view-boards" class="space-y-6 hidden">
+        <div class="flex flex-col md:flex-row md:items-center justify-between bg-white p-4 md:p-6 rounded-2xl border border-slate-200 shadow-sm gap-4">
+          <div>
+            <h2 class="text-base md:text-lg font-bold text-brand-purple">Project Management Dashboard</h2>
+            <p class="text-xs text-slate-500">Filter, sort, and manage agency hotel website builds.</p>
+          </div>
+          <button onclick="openCreateProjectModal()" class="bg-brand-purple hover:bg-brand-purpleDark text-white text-xs font-bold px-4 py-2.5 rounded-xl flex items-center justify-center space-x-2 transition shadow-md w-full md:w-auto">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            <span>Create New Project</span>
+          </button>
+        </div>
+
+        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-xs">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Filter by Project Manager</label>
+            <select id="filter-pm" onchange="renderBoardsGrid()" class="w-full border border-slate-200 rounded-xl p-2 bg-slate-50 outline-none focus:ring-2 focus:ring-brand-purple font-medium">
+              <option value="ALL">All Project Managers</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Filter by Evolution Template</label>
+            <select id="filter-evolution" onchange="renderBoardsGrid()" class="w-full border border-slate-200 rounded-xl p-2 bg-slate-50 outline-none focus:ring-2 focus:ring-brand-purple font-medium">
+              <option value="ALL">All Evolution Templates</option>
+              <option value="Crystal">Crystal</option>
+              <option value="Hendricks">Hendricks</option>
+              <option value="Sequoia">Sequoia</option>
+              <option value="Fuji">Fuji</option>
+              <option value="Berlin">Berlin</option>
+              <option value="Queen">Queen</option>
+              <option value="Paprika">Paprika</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Filter by Package Tier</label>
+            <select id="filter-package" onchange="renderBoardsGrid()" class="w-full border border-slate-200 rounded-xl p-2 bg-slate-50 outline-none focus:ring-2 focus:ring-brand-purple font-medium">
+              <option value="ALL">All Website Packages</option>
+              <option value="no_seo">Template No SEO</option>
+              <option value="seo_essential">SEO Essential</option>
+              <option value="seo_content">SEO Custom (SEO Content)</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="projects-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- MODALS -->
+  <div id="modal-notify" class="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 flex items-center justify-center hidden p-4">
+    <div class="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl space-y-4 border border-slate-200">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <h3 class="text-base font-bold text-brand-purple flex items-center space-x-2">
+          <i data-lucide="send" class="w-5 h-5 text-amber-500"></i>
+          <span>Send Urgent Deadline Alert</span>
+        </h3>
+        <button onclick="closeModal('modal-notify')" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Recipient Client Email</label>
+          <input id="na-email" type="email" readonly class="w-full border border-slate-200 bg-slate-50 rounded-xl p-2.5 text-slate-600 font-mono">
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Current Active Step Pending</label>
+          <input id="na-step" type="text" readonly class="w-full border border-slate-200 bg-slate-50 rounded-xl p-2.5 text-slate-800 font-bold">
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Step Target Deadline Date</label>
+          <input id="na-date" type="text" class="w-full border border-slate-200 rounded-xl p-2.5 text-amber-600 font-mono font-bold">
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Email Message Preview</label>
+          <textarea id="na-message" rows="5" class="w-full border border-slate-200 rounded-xl p-3 text-xs leading-relaxed outline-none focus:ring-2 focus:ring-brand-purple font-sans"></textarea>
+        </div>
+
+        <div class="pt-3 flex justify-end space-x-2 border-t border-slate-100">
+          <button type="button" onclick="closeModal('modal-notify')" class="px-4 py-2 rounded-xl bg-slate-100 text-slate-600 font-semibold">Cancel</button>
+          <button onclick="sendDeadlineEmail()" class="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold flex items-center space-x-1.5 shadow-sm">
+            <i data-lucide="mail" class="w-4 h-4"></i>
+            <span>Dispatch Email Alert</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="modal-project" class="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 flex items-center justify-center hidden p-4">
+    <div class="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl space-y-4 border border-slate-200 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <h3 id="modal-project-title-text" class="text-base font-bold text-brand-purple">Configure Project Specs</h3>
+        <button onclick="closeModal('modal-project')" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <form onsubmit="handleProjectFormSubmit(event)" class="space-y-3 text-xs">
+        <input type="hidden" id="mp-project-id">
+
+        <div>
+          <label class="block text-slate-700 font-bold mb-1">Hotel Property Name</label>
+          <input required id="mp-name" type="text" placeholder="e.g. Le Grand Hotel Paris" class="w-full border border-slate-200 rounded-xl p-2.5 outline-none focus:ring-2 focus:ring-brand-purple">
+        </div>
+
+        <div>
+          <label class="block text-slate-700 font-bold mb-1">Project Manager Name</label>
+          <input required id="mp-pm-name" type="text" placeholder="e.g. Dounia" class="w-full border border-slate-200 rounded-xl p-2.5 outline-none focus:ring-2 focus:ring-brand-purple">
+        </div>
+
+        <div>
+          <label class="block text-slate-700 font-bold mb-1">Client Email Address</label>
+          <input required id="mp-client-email" type="email" placeholder="client@hotel.com" class="w-full border border-slate-200 rounded-xl p-2.5 outline-none focus:ring-2 focus:ring-brand-purple">
+        </div>
+
+        <div>
+          <label class="block text-slate-700 font-bold mb-1">Evolution Template (Name-Tag Label)</label>
+          <select id="mp-evolution" class="w-full border border-slate-200 rounded-xl p-2.5 outline-none focus:ring-2 focus:ring-brand-purple bg-white">
+            <option value="Crystal">Crystal</option>
+            <option value="Hendricks">Hendricks</option>
+            <option value="Sequoia">Sequoia</option>
+            <option value="Fuji">Fuji</option>
+            <option value="Berlin">Berlin</option>
+            <option value="Queen">Queen</option>
+            <option value="Paprika">Paprika</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-slate-700 font-bold mb-1">Target Website Languages</label>
+          <div class="grid grid-cols-2 gap-1.5 p-2 bg-slate-50 border border-slate-200 rounded-xl text-[11px]">
+            <label class="flex items-center space-x-1.5"><input type="checkbox" value="English" class="mp-lang-checkbox"> <span>English</span></label>
+            <label class="flex items-center space-x-1.5"><input type="checkbox" value="French" class="mp-lang-checkbox"> <span>French</span></label>
+            <label class="flex items-center space-x-1.5"><input type="checkbox" value="Spanish" class="mp-lang-checkbox"> <span>Spanish</span></label>
+            <label class="flex items-center space-x-1.5"><input type="checkbox" value="German" class="mp-lang-checkbox"> <span>German</span></label>
+            <label class="flex items-center space-x-1.5"><input type="checkbox" value="Italian" class="mp-lang-checkbox"> <span>Italian</span></label>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-slate-700 font-bold mb-1">Website Package Tier</label>
+          <select id="mp-package" class="w-full border border-slate-200 rounded-xl p-2.5 outline-none focus:ring-2 focus:ring-brand-purple bg-white">
+            <option value="no_seo">Template No SEO</option>
+            <option value="seo_essential">SEO Essential Package</option>
+            <option value="seo_content">SEO Custom (SEO Content)</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-slate-700 font-bold mb-1">Default Google Drive Link</label>
+          <input required id="mp-drive" type="url" value="https://drive.google.com" class="w-full border border-slate-200 rounded-xl p-2.5 outline-none focus:ring-2 focus:ring-brand-purple">
+        </div>
+
+        <div class="pt-3 flex justify-end space-x-2 border-t border-slate-100">
+          <button type="button" onclick="closeModal('modal-project')" class="px-4 py-2 rounded-xl bg-slate-100 text-slate-600 font-semibold">Cancel</button>
+          <button type="submit" class="px-4 py-2 rounded-xl bg-brand-purple text-white font-bold hover:bg-brand-purpleDark shadow-sm">Save Project</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="modal-languages" class="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 flex items-center justify-center hidden p-4">
+    <div class="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl space-y-4 border border-slate-200">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <h3 class="text-base font-bold text-brand-purple">Manage Target Languages</h3>
+        <button onclick="closeModal('modal-languages')" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <div class="space-y-2 text-xs">
+        <label class="flex items-center space-x-2 p-2 bg-slate-50 rounded-lg"><input type="checkbox" value="English" class="lang-edit-cb"> <span>English</span></label>
+        <label class="flex items-center space-x-2 p-2 bg-slate-50 rounded-lg"><input type="checkbox" value="French" class="lang-edit-cb"> <span>French</span></label>
+        <label class="flex items-center space-x-2 p-2 bg-slate-50 rounded-lg"><input type="checkbox" value="Spanish" class="lang-edit-cb"> <span>Spanish</span></label>
+        <label class="flex items-center space-x-2 p-2 bg-slate-50 rounded-lg"><input type="checkbox" value="German" class="lang-edit-cb"> <span>German</span></label>
+        <label class="flex items-center space-x-2 p-2 bg-slate-50 rounded-lg"><input type="checkbox" value="Italian" class="lang-edit-cb"> <span>Italian</span></label>
+      </div>
+
+      <div class="pt-3 flex justify-end space-x-2 border-t border-slate-100">
+        <button onclick="saveLanguages()" class="px-4 py-2 rounded-xl bg-brand-purple text-white font-bold hover:bg-brand-purpleDark shadow-sm text-xs">Update Languages</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="modal-add-step" class="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 flex items-center justify-center hidden p-4">
+    <div class="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl space-y-4 border border-slate-200">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <h3 class="text-base font-bold text-brand-purple">Add New Milestone Step</h3>
+        <button onclick="closeModal('modal-add-step')" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <form onsubmit="handleAddStepSubmit(event)" class="space-y-3 text-xs">
+        <div>
+          <label class="block text-slate-700 font-bold mb-1">Phase Group Label</label>
+          <input required id="as-group" type="text" placeholder="e.g. Quality Assurance" class="w-full border border-slate-200 rounded-xl p-2.5 outline-none focus:ring-2 focus:ring-brand-purple">
+        </div>
+
+        <div>
+          <label class="block text-slate-700 font-bold mb-1">Step Title</label>
+          <input required id="as-title" type="text" placeholder="e.g. Final Security Check" class="w-full border border-slate-200 rounded-xl p-2.5 outline-none focus:ring-2 focus:ring-brand-purple">
+        </div>
+
+        <div>
+          <label class="block text-slate-700 font-bold mb-1">Responsibility Owner Tag</label>
+          <select id="as-owner" class="w-full border border-slate-200 rounded-xl p-2.5 outline-none focus:ring-2 focus:ring-brand-purple bg-white">
+            <option value="Client">Client</option>
+            <option value="DEDGE">D-EDGE</option>
+            <option value="Both">Both</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-slate-700 font-bold mb-1">Google Drive Link</label>
+          <input required id="as-drive" type="url" value="https://drive.google.com" class="w-full border border-slate-200 rounded-xl p-2.5 outline-none focus:ring-2 focus:ring-brand-purple">
+        </div>
+
+        <div class="pt-3 flex justify-end space-x-2 border-t border-slate-100">
+          <button type="button" onclick="closeModal('modal-add-step')" class="px-4 py-2 rounded-xl bg-slate-100 text-slate-600 font-semibold">Cancel</button>
+          <button type="submit" class="px-4 py-2 rounded-xl bg-brand-purple text-white font-bold hover:bg-brand-purpleDark shadow-sm">Append Step</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT LOGIC -->
+  <script>
+    // --- PRD PACKAGE TEMPLATES ---
+    const PRD_TEMPLATES = {
+      no_seo: [
+        { id: 'ns1', group: 'Sitemap Architecture', title: 'Sitemap Validation', date: '2026-06-01', owner: 'Client', status: 'completed', drive: 'https://drive.google.com', tasks: ['PM creates Excel proposed sitemap', 'Sitemap sent to client for review', 'Client validates final sitemap version'] },
+        { id: 'ns2', group: 'Content Collection', title: 'Content Collection', date: '2026-06-10', owner: 'Both', status: 'in_progress', drive: 'https://drive.google.com', tasks: ['Text / Content', 'Images', 'Fonts', 'Colors', 'Graphic charter / brand guidelines', 'Google Analytics 4 (Optional)', 'Google Maps API Key (Optional)'] },
+        { id: 'ns3', group: 'Website Creation Phase', title: 'Website Creation', date: '2026-07-01', owner: 'DEDGE', status: 'pending', drive: 'https://drive.google.com', tasks: ['Website build (4-6 weeks)', 'Additional developments & 3rd party integrations'] },
+        { id: 'ns4', group: 'Staging & Review', title: 'Staging Link Delivery', date: '2026-07-05', owner: 'DEDGE', status: 'pending', drive: 'https://drive.google.com', tasks: ['Send staging link to client for review'] },
+        { id: 'ns5', group: 'Iteration Rounds', title: 'Iteration Round 1 & PM Review', date: '2026-07-12', owner: 'Both', status: 'pending', drive: 'https://drive.google.com', tasks: ['Client reviews staging site & provides changes list', 'PM implements approved changes', 'Contract addendum sent if required'] },
+        { id: 'ns6', group: 'Iteration Rounds', title: 'Iteration Round 2 & Final Revisions', date: '2026-07-18', owner: 'Both', status: 'pending', drive: 'https://drive.google.com', tasks: ['Client final list of requested changes', 'PM implements final approved changes'] },
+        { id: 'ns7', group: 'Multilingual Integration', title: 'Main Language Validation & Translation', date: '2026-07-25', owner: 'Both', status: 'pending', drive: 'https://drive.google.com', tasks: ['Client validates main language website', 'Client sends translated content/texts', 'PM integrates translated content (1-2 wks/lang)'] },
+        { id: 'ns8', group: 'Publication Milestone', title: 'Final Validation, QA & Publication', date: '2026-08-01', owner: 'Both', status: 'pending', drive: 'https://drive.google.com', tasks: ['Client performs final website validation', 'PM completes QA checklist', 'Client performs DNS change', 'PM completes domain mapping', '1-hour CMS training scheduled', 'Websupport post-publication email sent'] }
+      ],
+      seo_essential: [
+        { id: 'se1', group: 'SEO Preparation', title: 'SEO Questionnaire', date: '2026-05-25', owner: 'Client', status: 'completed', drive: 'https://drive.google.com', tasks: ['Client completes SEO questionnaire'] },
+        { id: 'se2', group: 'Sitemap Architecture', title: 'Sitemap Validation', date: '2026-06-01', owner: 'Client', status: 'completed', drive: 'https://drive.google.com', tasks: ['PM creates proposed sitemap Excel', 'Client reviews and validates final sitemap'] },
+        { id: 'se3', group: 'SEO Strategy Phase', title: 'SEO Audit (Main Language)', date: '2026-06-08', owner: 'DEDGE', status: 'completed', drive: 'https://drive.google.com', tasks: ['SEO team conducts audit & keyword list', 'SEO team creates meta titles & descriptions'] },
+        { id: 'se4', group: 'SEO Strategy Phase', title: 'SEO Iteration & Client Validation', date: '2026-06-12', owner: 'Client', status: 'in_progress', drive: 'https://drive.google.com', tasks: ['Hotelier checks SEO doc & requests changes', 'Client validates main language audit'] },
+        { id: 'se5', group: 'SEO Strategy Phase', title: 'SEO Audit (Second Language)', date: '2026-06-18', owner: 'Both', status: 'pending', drive: 'https://drive.google.com', tasks: ['SEO team conducts 2nd language audit', 'Hotelier reviews and validates 2nd lang audit'] },
+        { id: 'se6', group: 'Content Collection', title: 'Content Collection (SEO Guided)', date: '2026-06-25', owner: 'Both', status: 'pending', drive: 'https://drive.google.com', tasks: ['Text/content using SEO audit keywords', 'Images & Fonts', 'Colors & Graphic charter', 'Google Analytics 4 & Maps API Key'] },
+        { id: 'se7', group: 'Website Creation Phase', title: 'Website Creation (4-6 Weeks)', date: '2026-07-15', owner: 'DEDGE', status: 'pending', drive: 'https://drive.google.com', tasks: ['Core website build & third party integrations'] },
+        { id: 'se8', group: 'Publication Milestone', title: 'Staging, QA & Publication', date: '2026-08-01', owner: 'Both', status: 'pending', drive: 'https://drive.google.com', tasks: ['Staging link review & iteration rounds', 'Main language & translation validation', 'Testing & QA checklist', 'DNS change & domain mapping', '1h CMS training & Websupport email'] }
+      ],
+      seo_content: [
+        { id: 'sc1', group: 'SEO Preparation', title: 'SEO Questionnaire', date: '2026-05-20', owner: 'Client', status: 'completed', drive: 'https://drive.google.com', tasks: ['Client fills out questionnaire for SEO team'] },
+        { id: 'sc2', group: 'Sitemap Architecture', title: 'Sitemap Validation', date: '2026-05-28', owner: 'Client', status: 'completed', drive: 'https://drive.google.com', tasks: ['PM creates proposed sitemap Excel', 'Client validates final sitemap version'] },
+        { id: 'sc3', group: 'SEO Strategy Phase', title: 'SEO Audit (Main Language)', date: '2026-06-05', owner: 'DEDGE', status: 'completed', drive: 'https://drive.google.com', tasks: ['Keywords, meta titles, & meta descriptions generated'] },
+        { id: 'sc4', group: 'Content Creation Phase', title: 'Content Creation & Validation (Main Lang)', date: '2026-06-15', owner: 'Both', status: 'in_progress', drive: 'https://drive.google.com', tasks: ['SEO team creates full page content', 'Client validates created content'] },
+        { id: 'sc5', group: 'Multilingual SEO', title: 'SEO Audit & Content (Second Language)', date: '2026-06-25', owner: 'Both', status: 'pending', drive: 'https://drive.google.com', tasks: ['Second language audit conducted', 'Hotelier reviews & validates 2nd lang audit', 'Client reviews & validates final 2nd lang content'] },
+        { id: 'sc6', group: 'Content Collection', title: 'Elements Collection', date: '2026-07-02', owner: 'Both', status: 'pending', drive: 'https://drive.google.com', tasks: ['Images, Fonts, Colors, Graphic charter', 'GA4 & Google Maps API key'] },
+        { id: 'sc7', group: 'Website Creation Phase', title: 'Website Creation (4-6 Weeks)', date: '2026-07-20', owner: 'DEDGE', status: 'pending', drive: 'https://drive.google.com', tasks: ['Website build & integrations'] },
+        { id: 'sc8', group: 'Publication Milestone', title: 'Staging, Iterations, QA & Launch', date: '2026-08-10', owner: 'Both', status: 'pending', drive: 'https://drive.google.com', tasks: ['Staging review & 2 iteration rounds', 'Final validation & QA checklist', 'DNS change, domain mapping, CMS training'] }
+      ]
+    };
+
+    // --- STATE MANAGEMENT ---
+    let projects = [
+      {
+        id: 'p1',
+        name: 'Le Grand Hotel Paris',
+        pmName: 'Dounia',
+        clientEmail: 'client@grandhotelparis.com',
+        evolutionTag: 'Crystal',
+        languages: ['English', 'French'],
+        packageTier: 'seo_essential',
+        driveUrl: 'https://drive.google.com',
+        graphicElements: {
+          imagesDrive: 'https://drive.google.com',
+          colors: 'Main: #0B132B, Secondary: #C5A059, Third: #F4F5F9',
+          fonts: 'Title: Playfair Display, Text: Inter'
+        },
+        thirdPartyBoxes: [
+          { id: 'tp1', title: 'Third Party Integrations', type: 'notes', description: 'e.g. Restaurant booking: Table Plus, The Fork, Zenchef. Provide scripts & docs.', value: 'TablePlus for direct dining reservations.', isEditing: false },
+          { id: 'tp2', title: 'Google Maps API Key', type: 'maps', description: 'Interactive map key with direct itinerary simulation.', value: 'AIzaSy...', isEditing: false },
+          { id: 'tp3', title: 'Google Analytics 4 (GA4)', type: 'ga4', description: 'Tracking code (Format: G-XXXXXX) for site metrics.', value: 'G-987654321', isEditing: false }
+        ],
+        steps: JSON.parse(JSON.stringify(PRD_TEMPLATES.seo_essential))
+      },
+      {
+        id: 'p2',
+        name: 'Resort Alpine & Spa',
+        pmName: 'Marc',
+        clientEmail: 'contact@alpineresort.com',
+        evolutionTag: 'Sequoia',
+        languages: ['English', 'German'],
+        packageTier: 'no_seo',
+        driveUrl: 'https://drive.google.com',
+        graphicElements: { imagesDrive: 'https://drive.google.com', colors: '', fonts: '' },
+        thirdPartyBoxes: [
+          { id: 'tp1', title: 'Third Party Integrations', type: 'notes', description: 'e.g. Restaurant booking: Table Plus, The Fork, Zenchef. Provide scripts & docs.', value: '', isEditing: true },
+          { id: 'tp2', title: 'Google Maps API Key', type: 'maps', description: 'Interactive map key with direct itinerary simulation.', value: '', isEditing: true },
+          { id: 'tp3', title: 'Google Analytics 4 (GA4)', type: 'ga4', description: 'Tracking code (Format: G-XXXXXX) for site metrics.', value: '', isEditing: true }
+        ],
+        steps: JSON.parse(JSON.stringify(PRD_TEMPLATES.no_seo))
+      }
+    ];
+
+    let currentProjectId = 'p1';
+    let currentRole = 'pm'; // 'pm' or 'client'
+
+    // --- INITIALIZATION ---
+    window.addEventListener('DOMContentLoaded', () => {
+      renderProjectSelector();
+      renderApp();
+      updatePmFilterOptions();
+      lucide.createIcons();
+    });
+
+    // --- SIDEBAR TOGGLE ---
+    function toggleSidebar() {
+      const sidebar = document.getElementById('main-sidebar');
+      const overlay = document.getElementById('sidebar-overlay');
+      const collapseIcon = document.getElementById('collapse-icon');
+
+      if (window.innerWidth < 768) {
+        sidebar.classList.toggle('-translate-x-full');
+        overlay.classList.toggle('hidden');
+      } else {
+        sidebar.classList.toggle('sidebar-collapsed');
+        if (sidebar.classList.contains('sidebar-collapsed')) {
+          collapseIcon.setAttribute('data-lucide', 'chevron-right');
+        } else {
+          collapseIcon.setAttribute('data-lucide', 'chevron-left');
+        }
+        lucide.createIcons();
+      }
+    }
+
+    // --- ROLE-BASED ACCESS CONTROL (RBAC) CONTROLLER ---
+    function setRole(role) {
+      currentRole = role;
+      const pmBtn = document.getElementById('btn-pm-view');
+      const clientBtn = document.getElementById('btn-client-view');
+      const roleLabel = document.getElementById('sb-role-label');
+      const navBoardsBtn = document.getElementById('nav-boards');
+      const projectSelector = document.getElementById('project-selector');
+      const headerEmailContainer = document.getElementById('header-email-container');
+      const btnPushNotify = document.getElementById('btn-push-notify');
+      const sbPmContainer = document.getElementById('sb-pm-container');
+      const btnLanguages = document.getElementById('btn-edit-languages');
+
+      if (role === 'pm') {
+        pmBtn.className = 'px-2.5 md:px-4 py-1.5 rounded-lg bg-brand-purple text-white shadow-sm transition text-[11px] md:text-xs';
+        clientBtn.className = 'px-2.5 md:px-4 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition text-[11px] md:text-xs';
+        roleLabel.textContent = 'Manager View';
+
+        navBoardsBtn.classList.remove('hidden');
+        projectSelector.classList.remove('hidden');
+        headerEmailContainer.classList.remove('hidden');
+        btnPushNotify.classList.remove('hidden');
+        sbPmContainer.classList.remove('hidden');
+        if (btnLanguages) btnLanguages.classList.remove('hidden');
+      } else {
+        clientBtn.className = 'px-2.5 md:px-4 py-1.5 rounded-lg bg-brand-purple text-white shadow-sm transition text-[11px] md:text-xs';
+        pmBtn.className = 'px-2.5 md:px-4 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition text-[11px] md:text-xs';
+        roleLabel.textContent = 'Client View';
+
+        navBoardsBtn.classList.add('hidden');
+        projectSelector.classList.add('hidden');
+        headerEmailContainer.classList.add('hidden');
+        btnPushNotify.classList.add('hidden');
+        sbPmContainer.classList.add('hidden');
+        if (btnLanguages) btnLanguages.classList.add('hidden');
+
+        switchView('timeline');
+      }
+
+      renderApp();
+    }
+
+    function switchView(tab) {
+      if (currentRole === 'client' && tab === 'boards') {
+        tab = 'timeline';
+      }
+
+      const boardsBtn = document.getElementById('nav-boards');
+      const timelineBtn = document.getElementById('nav-timeline');
+      const viewTimeline = document.getElementById('view-timeline');
+      const viewBoards = document.getElementById('view-boards');
+
+      if (tab === 'boards') {
+        boardsBtn.className = 'sidebar-nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-xs md:text-sm font-semibold bg-white/15 text-white shadow-sm transition';
+        timelineBtn.className = 'sidebar-nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-xs md:text-sm font-medium text-purple-200 hover:bg-white/10 transition';
+        viewTimeline.classList.add('hidden');
+        viewBoards.classList.remove('hidden');
+        renderBoardsGrid();
+      } else {
+        timelineBtn.className = 'sidebar-nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-xs md:text-sm font-semibold bg-white/15 text-white shadow-sm transition';
+        boardsBtn.className = 'sidebar-nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-xs md:text-sm font-medium text-purple-200 hover:bg-white/10 transition';
+        viewBoards.classList.add('hidden');
+        viewTimeline.classList.remove('hidden');
+        renderApp();
+      }
+
+      if (window.innerWidth < 768) {
+        document.getElementById('main-sidebar').classList.add('-translate-x-full');
+        document.getElementById('sidebar-overlay').classList.add('hidden');
+      }
+    }
+
+    // --- RENDER APP ---
+    function renderApp() {
+      const project = projects.find(p => p.id === currentProjectId);
+      if (!project) return;
+
+      document.getElementById('header-project-title').textContent = project.name;
+      document.getElementById('header-evolution-badge').textContent = `Template: ${project.evolutionTag}`;
+      document.getElementById('sb-project-name').textContent = project.name;
+      document.getElementById('sb-project-pkg').textContent = getPackageLabel(project.packageTier);
+      document.getElementById('sb-evolution-tag').textContent = `Template: ${project.evolutionTag}`;
+      document.getElementById('sb-pm-name').textContent = project.pmName || 'Dounia';
+      
+      document.getElementById('axis-project-name').textContent = project.name;
+      document.getElementById('axis-evolution-tag').textContent = `Template: ${project.evolutionTag}`;
+
+      const clientEmailInput = document.getElementById('header-client-email');
+      clientEmailInput.value = project.clientEmail || '';
+
+      const langContainer = document.getElementById('languages-display-container');
+      langContainer.innerHTML = (project.languages || ['English']).map(l => 
+        `<span class="text-[10px] bg-purple-100 text-brand-purple font-bold px-2 py-0.5 rounded border border-purple-200">${l}</span>`
+      ).join('');
+
+      document.getElementById('ge-images-drive').value = project.graphicElements?.imagesDrive || '';
+      document.getElementById('ge-colors').value = project.graphicElements?.colors || '';
+      document.getElementById('ge-fonts').value = project.graphicElements?.fonts || '';
+
+      renderThirdPartyBoxes(project);
+      renderTimelineAxis(project);
+      lucide.createIcons();
+    }
+
+    function getPackageLabel(tier) {
+      if (tier === 'no_seo') return 'Template No SEO';
+      if (tier === 'seo_essential') return 'SEO Essential';
+      return 'SEO Custom Content';
+    }
+
+    function renderProjectSelector() {
+      const selector = document.getElementById('project-selector');
+      selector.innerHTML = '';
+      projects.forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p.id;
+        opt.textContent = `${p.name} (${getPackageLabel(p.packageTier)})`;
+        if (p.id === currentProjectId) opt.selected = true;
+        selector.appendChild(opt);
+      });
+    }
+
+    function selectProject(id) {
+      currentProjectId = id;
+      renderApp();
+    }
+
+    function saveHeaderClientEmail() {
+      const val = document.getElementById('header-client-email').value;
+      const project = projects.find(p => p.id === currentProjectId);
+      if (project) {
+        project.clientEmail = val;
+        alert(`Client email updated to: ${val}`);
+      }
+    }
+
+    function saveGraphicElements() {
+      const project = projects.find(p => p.id === currentProjectId);
+      if (project) {
+        if (!project.graphicElements) project.graphicElements = {};
+        project.graphicElements.imagesDrive = document.getElementById('ge-images-drive').value;
+        project.graphicElements.colors = document.getElementById('ge-colors').value;
+        project.graphicElements.fonts = document.getElementById('ge-fonts').value;
+        alert('Graphic Elements successfully saved!');
+      }
+    }
+
+    // --- THIRD PARTY BOXES ---
+    function renderThirdPartyBoxes(project) {
+      const grid = document.getElementById('third-party-grid');
+      grid.innerHTML = '';
+
+      if (!project.thirdPartyBoxes) project.thirdPartyBoxes = [];
+
+      project.thirdPartyBoxes.forEach((box, idx) => {
+        const card = document.createElement('div');
+        card.className = 'bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3 relative group';
+
+        let icon = 'layers';
+        if (box.type === 'maps') icon = 'map-pin';
+        if (box.type === 'ga4') icon = 'bar-chart-2';
+
+        let extraLink = '';
+        if (box.type === 'ga4') {
+          extraLink = `
+            <a href="https://drive.google.com/file/d/1Vt12fEY4MJKNbOMyDAO-hn1uQ-q6lIgV/view?usp=drive_link" target="_blank" class="text-brand-purple font-bold text-[10px] underline flex items-center space-x-1 pt-1">
+              <i data-lucide="external-link" class="w-3 h-3"></i>
+              <span>View GA4 Setup Tutorial</span>
+            </a>
+          `;
+        }
+
+        let inlinePlusBtn = '';
+        if (box.type === 'notes') {
+          inlinePlusBtn = `
+            <button onclick="addNewThirdPartyBox()" class="mt-2 w-full py-1.5 bg-brand-purple/10 hover:bg-brand-purple text-brand-purple hover:text-white border border-brand-purple/30 rounded-lg font-bold text-xs flex items-center justify-center space-x-1 transition shadow-2xs">
+              <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+              <span>Add Custom Integration</span>
+            </button>
+          `;
+        }
+
+        const isEditing = box.isEditing !== false;
+
+        card.innerHTML = `
+          <div class="flex items-center justify-between">
+            <h4 class="font-bold text-slate-900 flex items-center space-x-1.5">
+              <i data-lucide="${icon}" class="w-4 h-4 text-brand-purple"></i>
+              <span>${box.title}</span>
+            </h4>
+            <div class="flex items-center space-x-1">
+              ${isEditing ? `
+                <button onclick="saveThirdPartyBox(${idx})" class="bg-brand-purple hover:bg-brand-purpleDark text-white text-[10px] font-bold px-2 py-0.5 rounded transition">
+                  Save
+                </button>
+              ` : `
+                <button onclick="editThirdPartyBox(${idx})" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-[10px] font-bold px-2 py-0.5 rounded transition">
+                  Edit
+                </button>
+              `}
+              ${currentRole === 'pm' ? `
+                <button onclick="deleteThirdPartyBox(${idx})" class="text-slate-300 hover:text-rose-500 transition pl-1">
+                  <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                </button>
+              ` : ''}
+            </div>
+          </div>
+
+          <p class="text-slate-600 text-[11px] leading-relaxed select-none bg-white p-2 rounded border border-slate-200">${box.description}</p>
+          ${inlinePlusBtn}
+
+          <textarea id="tp-box-input-${idx}" rows="2" ${!isEditing ? 'readonly' : ''} class="w-full border border-slate-200 ${!isEditing ? 'bg-slate-100 text-slate-500' : 'bg-white text-slate-800'} rounded-lg p-2 text-xs outline-none focus:ring-2 focus:ring-brand-purple font-mono">${box.value || ''}</textarea>
+          ${extraLink}
+        `;
+
+        grid.appendChild(card);
+      });
+    }
+
+    function saveThirdPartyBox(idx) {
+      const project = projects.find(p => p.id === currentProjectId);
+      if (project && project.thirdPartyBoxes[idx]) {
+        const val = document.getElementById(`tp-box-input-${idx}`).value;
+        project.thirdPartyBoxes[idx].value = val;
+        project.thirdPartyBoxes[idx].isEditing = false;
+        renderApp();
+      }
+    }
+
+    function editThirdPartyBox(idx) {
+      const project = projects.find(p => p.id === currentProjectId);
+      if (project && project.thirdPartyBoxes[idx]) {
+        project.thirdPartyBoxes[idx].isEditing = true;
+        renderApp();
+      }
+    }
+
+    function addNewThirdPartyBox() {
+      const title = prompt("Enter Third-Party Integration Name (e.g., Zenchef Widget, LiveChat):");
+      if (!title || !title.trim()) return;
+
+      const desc = prompt("Enter Description/Instructions:");
+
+      const project = projects.find(p => p.id === currentProjectId);
+      if (project) {
+        if (!project.thirdPartyBoxes) project.thirdPartyBoxes = [];
+        project.thirdPartyBoxes.push({
+          id: `tp-${Date.now()}`,
+          title: title.trim(),
+          type: 'custom',
+          description: desc || 'Provide integration script or documentation details.',
+          value: '',
+          isEditing: true
+        });
+        renderApp();
+      }
+    }
+
+    function deleteThirdPartyBox(idx) {
+      const project = projects.find(p => p.id === currentProjectId);
+      if (project && project.thirdPartyBoxes) {
+        project.thirdPartyBoxes.splice(idx, 1);
+        renderApp();
+      }
+    }
+
+    // --- AUTOMATED NO-REPLY DEADLINE ALERT DISPATCHER ---
+    function openNotifyModal() {
+      const project = projects.find(p => p.id === currentProjectId);
+      if (!project) return;
+
+      const pendingStep = project.steps.find(s => s.status !== 'completed') || project.steps[project.steps.length - 1];
+
+      document.getElementById('na-email').value = project.clientEmail || 'client@hotel.com';
+      document.getElementById('na-step').value = pendingStep.title;
+      document.getElementById('na-date').value = pendingStep.date;
+
+      const defaultMsg = `Dear ${project.name} Team,\n\nThis is an urgent reminder regarding your website creation timeline. We are currently waiting on your action for the step "${pendingStep.title}" due by ${pendingStep.date}.\n\nPlease validate or send the required assets as soon as possible. If this step is delayed, the website creation process will stagnate and push back your target launch date.\n\nBest regards,\n${project.pmName || 'Dounia'} (D-EDGE Project Manager)`;
+
+      document.getElementById('na-message').value = defaultMsg;
+      document.getElementById('modal-notify').classList.remove('hidden');
+    }
+
+    async function sendDeadlineEmail() {
+      const email = document.getElementById('na-email').value;
+      const step = document.getElementById('na-step').value;
+      const customMessage = document.getElementById('na-message').value;
+
+      const sendBtn = document.querySelector("#modal-notify button[onclick='sendDeadlineEmail()']");
+      const originalText = sendBtn.innerHTML;
+      sendBtn.innerText = "Dispatching...";
+      sendBtn.disabled = true;
+
+      try {
+        const response = await fetch("/.netlify/functions/send-email", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            to: email,
+            subject: `URGENT: Action Required - ${step}`,
+            message: customMessage
+          })
+        });
+
+        if (response.ok) {
+          closeModal('modal-notify');
+          alert(`Automated no-reply email sent successfully to ${email}!`);
+        } else {
+          const errData = await response.json();
+          alert(`Failed to send email: ${JSON.stringify(errData)}`);
+        }
+      } catch (err) {
+        alert(`Error dispatching email: ${err.message}`);
+      } finally {
+        sendBtn.innerHTML = originalText;
+        sendBtn.disabled = false;
+      }
+    }
+
+    // --- TIMELINE RENDER WITH EDITABLE DATES AND DRIVE LINKS ---
+    function renderTimelineAxis(project) {
+      const container = document.getElementById('timeline-nodes-container');
+      container.innerHTML = '';
+
+      project.steps.forEach((step, idx) => {
+        const nodeWrapper = document.createElement('div');
+        nodeWrapper.className = 'relative flex flex-col items-center group shrink-0';
+        const position = idx % 2 === 0 ? 'top' : 'bottom';
+
+        let ownerColor = 'bg-cyan-500 text-white';
+        if (step.owner === 'DEDGE') ownerColor = 'bg-fuchsia-600 text-white';
+        if (step.owner === 'Both') ownerColor = 'bg-sky-500 text-white';
+
+        let actionBtnHtml = step.status === 'completed'
+          ? `<button onclick="toggleStepValidation('${step.id}')" ${currentRole === 'client' ? 'disabled' : ''} class="flex items-center space-x-1 border border-slate-200 bg-purple-50 text-brand-purple hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 text-[11px] font-bold px-3 py-1 rounded-lg transition shadow-2xs">
+              <i data-lucide="check" class="w-3.5 h-3.5"></i>
+              <span>${currentRole === 'pm' ? 'Completed (Devalidate)' : 'Completed'}</span>
+            </button>`
+          : `<button onclick="toggleStepValidation('${step.id}')" ${currentRole === 'client' && step.owner === 'DEDGE' ? 'disabled' : ''} class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-[11px] px-3 py-1 rounded-lg shadow-sm transition">
+              Approve Milestone Step
+            </button>`;
+
+        const deleteStepBtn = currentRole === 'pm' ? `
+          <button onclick="deleteStep('${step.id}')" title="Delete Step" class="p-1 hover:bg-slate-100 rounded text-slate-400 hover:text-rose-500 transition">
+            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+          </button>
+        ` : '';
+
+        const tasksHtml = step.tasks.map((taskText, tIdx) => `
+          <div class="flex items-center justify-between group/task py-0.5">
+            <label class="flex items-start space-x-2 text-[11px] text-slate-600 cursor-pointer flex-1">
+              <input type="checkbox" ${step.status === 'completed' || step.completedTaskIndices?.includes(tIdx) ? 'checked' : ''} onchange="toggleTaskCheck('${step.id}', ${tIdx})" class="mt-0.5 rounded border-slate-300 text-brand-purple focus:ring-brand-purple">
+              <span>${taskText}</span>
+            </label>
+            ${currentRole === 'pm' ? `
+              <button onclick="deleteStepTask('${step.id}', ${tIdx})" class="opacity-0 group-hover/task:opacity-100 text-slate-300 hover:text-rose-500 transition pl-1">
+                <i data-lucide="x" class="w-3 h-3"></i>
+              </button>
+            ` : ''}
+          </div>
+        `).join('');
+
+        // EDITABLE & SAVEABLE DATE PICKER WITH "DEADLINE:" LABEL FOR MANAGERS
+        const dateHtml = currentRole === 'pm' ? `
+          <div class="flex items-center space-x-1 text-[11px]">
+            <i data-lucide="calendar" class="w-3 h-3 text-slate-400 shrink-0"></i>
+            <span class="text-[10px] font-bold text-slate-500 shrink-0">Deadline:</span>
+            <input id="date-input-${step.id}" type="date" value="${step.date}" class="border border-slate-200 bg-slate-50 text-slate-700 font-medium rounded px-1 py-0.5 w-24 outline-none focus:ring-1 focus:ring-brand-purple text-[10px]">
+            <button onclick="saveStepDate('${step.id}')" class="bg-brand-purple hover:bg-brand-purpleDark text-white text-[9px] font-bold px-1.5 py-0.5 rounded transition shrink-0">
+              Save
+            </button>
+          </div>
+        ` : `
+          <span class="flex items-center space-x-1 text-[11px] text-slate-500 font-medium">
+            <i data-lucide="calendar" class="w-3 h-3"></i>
+            <span class="font-bold text-slate-600">Deadline: ${step.date}</span>
+          </span>
+        `;
+
+        // EDITABLE & SAVEABLE DRIVE LINK FOR MANAGERS
+        const driveHtml = currentRole === 'pm' ? `
+          <div class="flex items-center space-x-1.5 text-[10px]">
+            <span class="text-slate-400 font-medium shrink-0">Drive:</span>
+            <input id="drive-input-${step.id}" type="url" value="${step.drive || ''}" class="border border-slate-200 bg-slate-50 text-brand-purple underline font-semibold rounded px-1.5 py-0.5 w-32 outline-none focus:ring-1 focus:ring-brand-purple truncate">
+            <button onclick="saveStepDrive('${step.id}')" class="bg-brand-purple hover:bg-brand-purpleDark text-white text-[9px] font-bold px-2 py-0.5 rounded transition shrink-0">
+              Save
+            </button>
+          </div>
+        ` : `
+          <div class="text-[11px]">
+            <span class="text-slate-500">Workspace Link: </span>
+            <a href="${step.drive || '#'}" target="_blank" class="text-brand-purple underline font-semibold">Google Drive Link</a>
+          </div>
+        `;
+
+        const cardHtml = `
+          <div class="w-72 bg-white border border-slate-200 rounded-2xl p-4 shadow-sm text-xs space-y-2.5 relative z-20">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+              ${dateHtml}
+              <span class="px-2 py-0.5 rounded-full font-bold text-[9px] uppercase tracking-wider ${ownerColor}">${step.owner}</span>
+            </div>
+
+            <h4 class="font-bold text-slate-900 leading-tight">${step.title}</h4>
+            ${driveHtml}
+
+            <div class="space-y-1 pt-1.5 border-t border-slate-100">
+              ${tasksHtml}
+              ${currentRole === 'pm' ? `
+                <button onclick="promptAddStepTask('${step.id}')" class="mt-1 text-[10px] text-brand-purple font-bold flex items-center space-x-1 hover:underline">
+                  <i data-lucide="plus-circle" class="w-3 h-3"></i>
+                  <span>Add Checklist Item</span>
+                </button>
+              ` : ''}
+            </div>
+          </div>
+        `;
+
+        const lineHtml = `<div class="w-0.5 h-10 bg-slate-400"></div>`;
+        const groupPillHtml = `<div class="bg-brand-pillBg text-slate-600 text-[10px] font-bold px-3 py-1 rounded-full border border-slate-200/60 shadow-2xs whitespace-nowrap mb-1">${step.group}</div>`;
+        let circleHtml = step.status === 'completed'
+          ? `<div class="w-7 h-7 rounded-full bg-white border-2 border-slate-400 flex items-center justify-center shadow-xs"><div class="w-3.5 h-3.5 rounded-full bg-slate-500"></div></div>`
+          : `<div class="w-7 h-7 rounded-full bg-brand-purple border-2 border-brand-purple flex items-center justify-center shadow-md"><div class="w-3 h-3 rounded-full bg-white"></div></div>`;
+
+        if (position === 'top') {
+          nodeWrapper.innerHTML = `
+            <div class="flex flex-col items-center mb-2">${groupPillHtml}${cardHtml}${lineHtml}</div>
+            ${circleHtml}
+            <div class="flex items-center space-x-1 mt-2">${actionBtnHtml}${deleteStepBtn}</div>
+          `;
+        } else {
+          nodeWrapper.innerHTML = `
+            <div class="flex items-center space-x-1 mb-2">${actionBtnHtml}${deleteStepBtn}</div>
+            ${circleHtml}
+            <div class="flex flex-col items-center mt-2">${lineHtml}${cardHtml}<div class="mt-2">${groupPillHtml}</div></div>
+          `;
+        }
+
+        container.appendChild(nodeWrapper);
+      });
+
+      if (currentRole === 'pm') {
+        const addNodeBtn = document.createElement('div');
+        addNodeBtn.className = 'flex flex-col items-center justify-center pl-6 shrink-0';
+        addNodeBtn.innerHTML = `
+          <button onclick="openAddStepModal()" class="w-12 h-12 rounded-2xl bg-brand-purple hover:bg-brand-purpleDark text-white flex items-center justify-center shadow-lg transition transform hover:scale-105" title="Add New Milestone Step">
+            <i data-lucide="plus" class="w-6 h-6"></i>
+          </button>
+          <span class="text-[10px] font-bold text-brand-purple mt-2">Add Step</span>
+        `;
+        container.appendChild(addNodeBtn);
+      }
+    }
+
+    // --- SAVE STEP DATE ACTION ---
+    function saveStepDate(stepId) {
+      const newDate = document.getElementById(`date-input-${stepId}`).value;
+      const project = projects.find(p => p.id === currentProjectId);
+      if (project) {
+        const step = project.steps.find(s => s.id === stepId);
+        if (step) {
+          step.date = newDate;
+          alert(`Deadline updated to ${newDate} for milestone step "${step.title}"!`);
+        }
+      }
+    }
+
+    // --- SAVE DRIVE LINK ACTION ---
+    function saveStepDrive(stepId) {
+      const newUrl = document.getElementById(`drive-input-${stepId}`).value;
+      const project = projects.find(p => p.id === currentProjectId);
+      if (project) {
+        const step = project.steps.find(s => s.id === stepId);
+        if (step) {
+          step.drive = newUrl;
+          alert(`Google Drive URL saved for step "${step.title}"!`);
+        }
+      }
+    }
+
+    // --- LANGUAGES MODAL ---
+    function openLanguagesModal() {
+      const project = projects.find(p => p.id === currentProjectId);
+      const cbs = document.querySelectorAll('.lang-edit-cb');
+      cbs.forEach(cb => {
+        cb.checked = project.languages && project.languages.includes(cb.value);
+      });
+      document.getElementById('modal-languages').classList.remove('hidden');
+    }
+
+    function saveLanguages() {
+      const checkedLangs = Array.from(document.querySelectorAll('.lang-edit-cb:checked')).map(cb => cb.value);
+      const project = projects.find(p => p.id === currentProjectId);
+      if (project) {
+        project.languages = checkedLangs.length ? checkedLangs : ['English'];
+      }
+      closeModal('modal-languages');
+      renderApp();
+    }
+
+    // --- TIMELINE STEP CONTROLS ---
+    function toggleStepValidation(stepId) {
+      const project = projects.find(p => p.id === currentProjectId);
+      const step = project.steps.find(s => s.id === stepId);
+      if (!step) return;
+
+      if (step.status === 'completed') {
+        step.status = 'in_progress';
+        step.completedTaskIndices = [];
+      } else {
+        step.status = 'completed';
+        step.completedTaskIndices = step.tasks.map((_, i) => i);
+      }
+      renderApp();
+    }
+
+    function toggleTaskCheck(stepId, taskIdx) {
+      const project = projects.find(p => p.id === currentProjectId);
+      const step = project.steps.find(s => s.id === stepId);
+      if (!step) return;
+
+      if (!step.completedTaskIndices) step.completedTaskIndices = [];
+
+      const foundIdx = step.completedTaskIndices.indexOf(taskIdx);
+      if (foundIdx > -1) {
+        step.completedTaskIndices.splice(foundIdx, 1);
+        step.status = 'in_progress';
+      } else {
+        step.completedTaskIndices.push(taskIdx);
+      }
+
+      if (step.completedTaskIndices.length === step.tasks.length && step.tasks.length > 0) {
+        step.status = 'completed';
+      }
+      renderApp();
+    }
+
+    function deleteStepTask(stepId, taskIdx) {
+      const project = projects.find(p => p.id === currentProjectId);
+      const step = project.steps.find(s => s.id === stepId);
+      if (!step) return;
+
+      step.tasks.splice(taskIdx, 1);
+      step.completedTaskIndices = [];
+      renderApp();
+    }
+
+    function promptAddStepTask(stepId) {
+      const taskText = prompt("Enter new checklist item:");
+      if (!taskText || !taskText.trim()) return;
+
+      const project = projects.find(p => p.id === currentProjectId);
+      const step = project.steps.find(s => s.id === stepId);
+      if (step) {
+        step.tasks.push(taskText.trim());
+        renderApp();
+      }
+    }
+
+    function deleteStep(stepId) {
+      const project = projects.find(p => p.id === currentProjectId);
+      project.steps = project.steps.filter(s => s.id !== stepId);
+      renderApp();
+    }
+
+    // --- ADMIN BOARDS GRID & FILTER SYSTEM ---
+    function updatePmFilterOptions() {
+      const select = document.getElementById('filter-pm');
+      select.innerHTML = '<option value="ALL">All Project Managers</option>';
+      const pmNames = [...new Set(projects.map(p => p.pmName || 'Dounia'))];
+      pmNames.forEach(name => {
+        const opt = document.createElement('option');
+        opt.value = name;
+        opt.textContent = name;
+        select.appendChild(opt);
+      });
+    }
+
+    function renderBoardsGrid() {
+      const container = document.getElementById('projects-grid');
+      container.innerHTML = '';
+
+      const pmFilter = document.getElementById('filter-pm').value;
+      const evoFilter = document.getElementById('filter-evolution').value;
+      const pkgFilter = document.getElementById('filter-package').value;
+
+      const filteredProjects = projects.filter(p => {
+        const matchesPm = (pmFilter === 'ALL' || (p.pmName || 'Dounia') === pmFilter);
+        const matchesEvo = (evoFilter === 'ALL' || p.evolutionTag === evoFilter);
+        const matchesPkg = (pkgFilter === 'ALL' || p.packageTier === pkgFilter);
+        return matchesPm && matchesEvo && matchesPkg;
+      });
+
+      if (filteredProjects.length === 0) {
+        container.innerHTML = `
+          <div class="col-span-full bg-white p-8 rounded-2xl border border-slate-200 text-center text-slate-500">
+            <i data-lucide="folder-search" class="w-8 h-8 mx-auto mb-2 text-slate-400"></i>
+            <p class="font-bold">No projects found matching the selected categories.</p>
+          </div>
+        `;
+        lucide.createIcons();
+        return;
+      }
+
+      filteredProjects.forEach(p => {
+        const completedCount = p.steps.filter(s => s.status === 'completed').length;
+        const pct = Math.round((completedCount / p.steps.length) * 100);
+
+        const card = document.createElement('div');
+        card.className = 'bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-4 hover:border-brand-purple transition relative group';
+
+        card.innerHTML = `
+          <div class="flex items-center justify-between">
+            <span class="bg-purple-100 text-brand-purple text-[10px] font-bold px-2.5 py-1 rounded-md font-mono">Template: ${p.evolutionTag}</span>
+            <div class="flex items-center space-x-2">
+              <span class="text-xs font-bold text-emerald-600">${pct}% Complete</span>
+              <button onclick="event.stopPropagation(); openEditProjectModal('${p.id}')" title="Edit Project Specs" class="p-1 hover:bg-slate-100 rounded text-slate-400 hover:text-brand-purple transition">
+                <i data-lucide="edit-3" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+
+          <div onclick="currentProjectId='${p.id}'; switchView('timeline');" class="cursor-pointer">
+            <h3 class="text-base font-bold text-slate-900">${p.name}</h3>
+            <p class="text-xs text-slate-500 font-medium mt-0.5">PM: ${p.pmName || 'Dounia'} | Client: ${p.clientEmail}</p>
+          </div>
+
+          <div class="w-full bg-slate-100 rounded-full h-2">
+            <div class="bg-brand-purple h-2 rounded-full" style="width: ${pct}%"></div>
+          </div>
+
+          <div class="pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+            <span>${p.steps.length} Steps</span>
+            <span onclick="currentProjectId='${p.id}'; switchView('timeline');" class="text-brand-purple font-bold flex items-center space-x-1 cursor-pointer">
+              <span>View Axis</span>
+              <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+            </span>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+      lucide.createIcons();
+    }
+
+    // --- CREATE / EDIT PROJECT MODAL LOGIC ---
+    function openCreateProjectModal() {
+      document.getElementById('modal-project-title-text').textContent = 'Create New Hotel Project';
+      document.getElementById('mp-project-id').value = '';
+      document.getElementById('mp-name').value = '';
+      document.getElementById('mp-pm-name').value = 'Dounia';
+      document.getElementById('mp-client-email').value = '';
+      document.getElementById('mp-evolution').value = 'Crystal';
+      document.getElementById('mp-package').value = 'seo_essential';
+      document.getElementById('mp-drive').value = 'https://drive.google.com';
+
+      document.querySelectorAll('.mp-lang-checkbox').forEach(cb => {
+        cb.checked = (cb.value === 'English' || cb.value === 'French');
+      });
+
+      document.getElementById('modal-project').classList.remove('hidden');
+    }
+
+    function openEditProjectModal(projId) {
+      const project = projects.find(p => p.id === projId);
+      if (!project) return;
+
+      document.getElementById('modal-project-title-text').textContent = 'Edit Project Specificities';
+      document.getElementById('mp-project-id').value = project.id;
+      document.getElementById('mp-name').value = project.name;
+      document.getElementById('mp-pm-name').value = project.pmName || 'Dounia';
+      document.getElementById('mp-client-email').value = project.clientEmail || '';
+      document.getElementById('mp-evolution').value = project.evolutionTag;
+      document.getElementById('mp-package').value = project.packageTier;
+      document.getElementById('mp-drive').value = project.driveUrl;
+
+      document.querySelectorAll('.mp-lang-checkbox').forEach(cb => {
+        cb.checked = project.languages && project.languages.includes(cb.value);
+      });
+
+      document.getElementById('modal-project').classList.remove('hidden');
+    }
+
+    function handleProjectFormSubmit(e) {
+      e.preventDefault();
+      const projId = document.getElementById('mp-project-id').value;
+      const name = document.getElementById('mp-name').value;
+      const pmName = document.getElementById('mp-pm-name').value;
+      const clientEmail = document.getElementById('mp-client-email').value;
+      const evo = document.getElementById('mp-evolution').value;
+      const tier = document.getElementById('mp-package').value;
+      const drive = document.getElementById('mp-drive').value;
+
+      const checkedLangs = Array.from(document.querySelectorAll('.mp-lang-checkbox:checked')).map(cb => cb.value);
+
+      if (projId) {
+        const project = projects.find(p => p.id === projId);
+        if (project) {
+          project.name = name;
+          project.pmName = pmName;
+          project.clientEmail = clientEmail;
+          project.evolutionTag = evo;
+          project.languages = checkedLangs.length ? checkedLangs : ['English'];
+          if (project.packageTier !== tier) {
+            project.packageTier = tier;
+            project.steps = JSON.parse(JSON.stringify(PRD_TEMPLATES[tier]));
+          }
+          project.driveUrl = drive;
+        }
+      } else {
+        const newProj = {
+          id: `proj-${Date.now()}`,
+          name: name,
+          pmName: pmName,
+          clientEmail: clientEmail,
+          evolutionTag: evo,
+          languages: checkedLangs.length ? checkedLangs : ['English'],
+          packageTier: tier,
+          driveUrl: drive,
+          graphicElements: { imagesDrive: drive, colors: '', fonts: '' },
+          thirdPartyBoxes: [
+            { id: 'tp1', title: 'Third Party Integrations', type: 'notes', description: 'e.g. Restaurant booking: Table Plus, The Fork, Zenchef. Provide scripts & docs.', value: '', isEditing: true },
+            { id: 'tp2', title: 'Google Maps API Key', type: 'maps', description: 'Interactive map key with direct itinerary simulation.', value: '', isEditing: true },
+            { id: 'tp3', title: 'Google Analytics 4 (GA4)', type: 'ga4', description: 'Tracking code (Format: G-XXXXXX) for site metrics.', value: '', isEditing: true }
+          ],
+          steps: JSON.parse(JSON.stringify(PRD_TEMPLATES[tier]))
+        };
+        projects.push(newProj);
+        currentProjectId = newProj.id;
+      }
+
+      updatePmFilterOptions();
+      renderProjectSelector();
+      closeModal('modal-project');
+      renderBoardsGrid();
+      renderApp();
+    }
+
+    function openAddStepModal() {
+      document.getElementById('modal-add-step').classList.remove('hidden');
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.add('hidden');
+    }
+
+    function handleAddStepSubmit(e) {
+      e.preventDefault();
+      const group = document.getElementById('as-group').value;
+      const title = document.getElementById('as-title').value;
+      const owner = document.getElementById('as-owner').value;
+      const drive = document.getElementById('as-drive').value;
+
+      const project = projects.find(p => p.id === currentProjectId);
+      project.steps.push({
+        id: `step-${Date.now()}`,
+        group: group,
+        title: title,
+        date: new Date().toISOString().split('T')[0],
+        owner: owner,
+        status: 'pending',
+        drive: drive,
+        tasks: ['Initial milestone requirement verification']
+      });
+
+      closeModal('modal-add-step');
+      renderApp();
+    }
+  </script>
+</body>
+</html>
